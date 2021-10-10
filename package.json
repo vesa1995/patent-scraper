@@ -14,6 +14,8 @@
     "morgan": "~1.9.1"
   },
   "devDependencies": {
+    "concurrently": "^6.3.0",
+    "http-server": "^13.0.2",
     "jest": "26.4.2",
     "prettier": "2.1.2",
     "puppeteer": "^10.4.0"

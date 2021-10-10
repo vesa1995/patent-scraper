@@ -1,9 +1,9 @@
-import puppeteer from 'puppeteer'
+const puppeteer = require("puppeteer");
 
 async function getPatentData() {
     const scrappedData = {};
     const initialPageUrl = 'https://portal.bpo.bg/web/guest/bpo_online/-/bpo/epo_patent-search'
-    let launchOptions = {headless: false, args: ['--start-fullscreen'], waitUntil: 'networkidle2'};
+    let launchOptions = {headless: true, args: ['--start-fullscreen'], waitUntil: 'networkidle2'};
     let browser = await puppeteer.launch(launchOptions);
     let page = await browser.newPage();
     await page.setDefaultNavigationTimeout(0);
@@ -23,7 +23,8 @@ async function getPatentData() {
     await page.waitForTimeout(3000)
 
     // advanced search button
-    await page.waitForSelector('#_bposervicesportlet_WAR_bposervicesportlet_\\:main_form\\:togle_link', {visibe: true});
+    await page.waitForSelector('#_bposervicesportlet_WAR_bposervicesportlet_\\:main_form\\:togle_link',
+        {visibe: true});
     const [linkHtml] = await page.$x('//*[@id="_bposervicesportlet_WAR_bposervicesportlet_:main_form:togle_link"]')
     if (linkHtml) {
         await linkHtml.click({delay: 500});
@@ -37,20 +38,20 @@ async function getPatentData() {
     }
 
     // application number form
-    page.waitForSelector('#_bposervicesportlet_WAR_bposervicesportlet_\\:main_form\\:app-num-panel');
-    const timeoutTextBoxes = await page.waitForTimeout(200).then(async () => {
+    await page.waitForSelector('#_bposervicesportlet_WAR_bposervicesportlet_\\:main_form\\:app-num-panel');
+    await page.waitForTimeout(800).then(async () => { // todo read waitForTimeout docs
         // input field
         const [textBox1] = await page.$x('//*[@id="_bposervicesportlet_WAR_bposervicesportlet_:main_form:app-num-start_input"]');
-        await textBox1.focus({delay: 500});  // todo possible error here, texBox1 could be undefined
-        const typed = await page.keyboard.type('EP10797960'); // todo extract this into var
+        await textBox1.focus();
+        await page.keyboard.type('EP10797960'); // todo extract this into var
         // search button
         const [button] = await page.$x('//*[@id="_bposervicesportlet_WAR_bposervicesportlet_:main_form:submit_button"]')
-        button.click({delay: 500})
+        await button.click({delay: 500})
         // search result table
-        const tableShown = await page.waitForSelector('#_bposervicesportlet_WAR_bposervicesportlet_\\:main_form\\:table_result');
+        await page.waitForSelector('#_bposervicesportlet_WAR_bposervicesportlet_\\:main_form\\:table_result');
         // eye button
         const [eyeLink] = await page.$x('//*[@id="_bposervicesportlet_WAR_bposervicesportlet_:main_form:table_result:0:j_idt365"]')
-        eyeLink.click({delay: 500})
+        await eyeLink.click({delay: 500})
     });
 
     await page.waitForNavigation();
@@ -59,9 +60,9 @@ async function getPatentData() {
 
     // open all button
     const [expanderLink] = await page.$x('//*[@id="_bposervicesportlet_WAR_bposervicesportlet_:j_idt13:j_idt23:open_all_toggel_panel"]');
-    expanderLink.click({delay: 1000})
+    await expanderLink.click({delay: 1000})
     // details data
-    const detailsData = await page.$eval('#_bposervicesportlet_WAR_bposervicesportlet_\\:j_idt13\\:j_idt62\\:j_idt63', el => {
+    await page.$eval('#_bposervicesportlet_WAR_bposervicesportlet_\\:j_idt13\\:j_idt62\\:j_idt63', el => {
         return el.outerHTML
     });
     // Details > Application number
@@ -109,6 +110,7 @@ async function getPatentData() {
     //  vec po sesiji server zna sta nama treba
 
     console.log('#######', scrappedData);
+    await browser.close();
 }
 
 module.exports = {
