@@ -12,5 +12,12 @@ router.get(
         res.send(windspeed);
     })
 );
+router.get(
+    "/patent",
+    asyncHandler(async (req, res, next) => {
+        const patentData = await windSpeed.getWindSpeedAtCurrentLocation();
+        res.send(patentData);
+    })
+);
 
 module.exports = router;
