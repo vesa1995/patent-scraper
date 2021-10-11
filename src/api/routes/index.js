@@ -15,11 +15,9 @@ router.get(
 );
 
 router.get(
-    "/patent",
+    "/patent/:appNumber", // EP10797960
     asyncHandler(async (req, res, next) => {
-        // const patentData = await patentService.getPatentData();
-        // res.send(patentData);
-        const patentData = patentService.getPatentData();
+        const patentData = await patentService.getPatentData(req.params["appNumber"]);
         res.send(patentData);
     })
 );

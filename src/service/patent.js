@@ -1,6 +1,7 @@
 const puppeteer = require("puppeteer");
 
-async function getPatentData() {
+async function getPatentData(appNumber) {
+    const appNumberToSearch = appNumber;
     const scrappedData = {};
     const initialPageUrl = 'https://portal.bpo.bg/web/guest/bpo_online/-/bpo/epo_patent-search'
     let launchOptions = {headless: true, args: ['--start-fullscreen'], waitUntil: 'networkidle2'};
@@ -43,7 +44,7 @@ async function getPatentData() {
         // input field
         const [textBox1] = await page.$x('//*[@id="_bposervicesportlet_WAR_bposervicesportlet_:main_form:app-num-start_input"]');
         await textBox1.focus();
-        await page.keyboard.type('EP10797960'); // todo extract this into var
+        await page.keyboard.type(appNumberToSearch);
         // search button
         const [button] = await page.$x('//*[@id="_bposervicesportlet_WAR_bposervicesportlet_:main_form:submit_button"]')
         await button.click({delay: 500})
@@ -111,6 +112,7 @@ async function getPatentData() {
 
     console.log('#######', scrappedData);
     await browser.close();
+    return scrappedData;
 }
 
 module.exports = {
