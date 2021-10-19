@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
-const { mongoUrl } = require('./constants');
+const {mongoUrl} = require('./constants');
 
 module.exports = {
     initializeDB: async () => {
-        mongoose.connect(mongoUrl, { useNewUrlParser: true });
+        mongoose.connect(mongoUrl, {useNewUrlParser: true});
         mongoose.Promise = global.Promise;
     },
 

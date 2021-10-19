@@ -5,7 +5,7 @@
  */
 const debug = require("debug")("weather:server");
 const http = require("http");
-const { url, port: portNum } = require('./config/constants.js');
+const {url, port: portNum} = require('./config/constants.js');
 
 const app = require("./api/app");
 
