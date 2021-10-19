@@ -5,13 +5,14 @@
  */
 const debug = require("debug")("weather:server");
 const http = require("http");
+const { url, port: portNum } = require('./config/constants.js');
 
-const app = require("../src/api/app");
+const app = require("./api/app");
 
 /**
  * Get port from environment and store in Express.
  */
-const port = normalizePort(process.env.PORT || "3000");
+const port = normalizePort(portNum || process.env.PORT || "3000");
 app.set("port", port);
 
 /**
@@ -72,7 +73,7 @@ function onError(error) {
  * Event listener for HTTP server "listening" event.
  */
 function onListening() {
-    const addr = server.address();
+    const addr = (url || server.address());
     const bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
     debug("Listening on " + bind);
 }
