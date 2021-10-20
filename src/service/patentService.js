@@ -70,55 +70,55 @@ async function scrap(appNumberToSearch) {
         // open all button
         const [expanderLink] = await page.$x('//*[@id="_bposervicesportlet_WAR_bposervicesportlet_:j_idt13:j_idt23:open_all_toggel_panel"]');
         await expanderLink.click()
-        // details data
+        // details data (useless code)
         await page.$eval('#_bposervicesportlet_WAR_bposervicesportlet_\\:j_idt13\\:j_idt62\\:j_idt63', el => {
             return el.outerHTML
         });
         // Details > Application number
-        const publicationReferenceId = await page.$eval('#_bposervicesportlet_WAR_bposervicesportlet_\\:j_idt13\\:j_idt62\\:j_idt63 > div:nth-child(1) > div:nth-child(2)', el => {
-            return el.textContent
+        const applicationNumber = await page.$eval('#_bposervicesportlet_WAR_bposervicesportlet_\\:j_idt13\\:j_idt62\\:j_idt63 > div:nth-child(1) > div:nth-child(2)', el => {
+            return el.textContent.trim();
         })
         // Details > Issue/Registration date
         const registrationDate = await page.$eval('#_bposervicesportlet_WAR_bposervicesportlet_\\:j_idt13\\:j_idt62\\:j_idt63 > div:nth-child(2) > div:nth-child(4)', el => {
-            return el.textContent
+            return el.textContent.trim();
         })
-        // Details > Patent number todo maybe var name mistake
-        const applicationNumber = await page.$eval('#_bposervicesportlet_WAR_bposervicesportlet_\\:j_idt13\\:j_idt62\\:j_idt63 > div:nth-child(2) > div:nth-child(2)', el => {
-            return el.textContent
+        // Details > Patent number
+        const patentNumber = await page.$eval('#_bposervicesportlet_WAR_bposervicesportlet_\\:j_idt13\\:j_idt62\\:j_idt63 > div:nth-child(2) > div:nth-child(2)', el => {
+            return el.textContent.trim();
         })
         // Details > Application date
         const applicationDate = await page.$eval('#_bposervicesportlet_WAR_bposervicesportlet_\\:j_idt13\\:j_idt62\\:j_idt63 > div:nth-child(1) > div:nth-child(4)', el => {
-            return el.textContent
+            return el.textContent.trim();
         })
         // Details > Last paid
         const lastPaid = await page.$eval('#_bposervicesportlet_WAR_bposervicesportlet_\\:j_idt13\\:j_idt62\\:j_idt63 > div:nth-child(5) > div:nth-child(4)', el => {
-            return el.textContent
+            return el.textContent.trim();
         })
         // Details > Latest annual fee paid
-        const latestAnnualFeePayed = await page.$eval('#_bposervicesportlet_WAR_bposervicesportlet_\\:j_idt13\\:j_idt62\\:j_idt63 > div:nth-child(5) > div:nth-child(2)', el => {
-            return el.textContent
+        const latestAnnualFeePaid = await page.$eval('#_bposervicesportlet_WAR_bposervicesportlet_\\:j_idt13\\:j_idt62\\:j_idt63 > div:nth-child(5) > div:nth-child(2)', el => {
+            return el.textContent.trim();
         })
         // Applicant/Owner
         const applicationOwner = await page.$eval('#_bposervicesportlet_WAR_bposervicesportlet_\\:j_idt13\\:j_idt62\\:j_idt195 > div > div', el => {
-            return el.textContent
+            return el.textContent.trim();
         })
         // Details > Status
         const status = await page.$eval('#_bposervicesportlet_WAR_bposervicesportlet_\\:j_idt13\\:j_idt62\\:j_idt63 > div:nth-child(4) > div.ui-grid-col-9', el => {
-            return el.textContent
+            return el.textContent.trim();
         })
 
-        scrappedData.patentNumber = publicationReferenceId;
-        scrappedData.applicationNumber = applicationNumber; // todo mistake, see other todo comment
+        // set data
+        scrappedData.applicationNumber = applicationNumber;
+        scrappedData.patentNumber = patentNumber;
         scrappedData.registrationDate = registrationDate;
         scrappedData.aplicationDate = applicationDate;
         scrappedData.lastPaid = lastPaid;
-        scrappedData.latestAnnualFeePayed = latestAnnualFeePayed;
+        scrappedData.latestAnnualFeePaid = latestAnnualFeePaid;
         scrappedData.aplicationOwner = applicationOwner;
         scrappedData.status = status;
-        // todo add scrappedData.url (patent page url) - ovo moze biti da je nemoguce jer nema url,
-        //  vec po sesiji server zna sta nama treba
 
-        console.log('Patent data: ', scrappedData);
+        // output data
+        console.log('Patent data:', scrappedData);
     } catch (err) {
         console.log(err);
     }
