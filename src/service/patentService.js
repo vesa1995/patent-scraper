@@ -1,28 +1,42 @@
 const puppeteer = require("puppeteer");
 
+const bulgariaPatentsPageURL = 'https://portal.bpo.bg/web/guest/bpo_online/-/bpo/epo_patent-search'
+const scrappedData = {};
+
+let browser;
+let page;
+
+
 async function getPatentData(appNumber) {
-    const appNumberToSearch = appNumber;
-    const scrappedData = {};
-    const initialPageUrl = 'https://portal.bpo.bg/web/guest/bpo_online/-/bpo/epo_patent-search'
-    let launchOptions = {headless: true, /*args: ['--start-fullscreen'],*/ waitUntil: 'networkidle2'};
-    let browser = await puppeteer.launch(launchOptions);
-    let page = await browser.newPage();
+    await startBrowser();
+    await scrap(appNumber);
+    await closeBrowser();
+    return scrappedData;
+}
+
+async function startBrowser() {
+    const launchOptions = {headless: true, /*args: ['--start-fullscreen'],*/ waitUntil: 'networkidle2'};
+    browser = await puppeteer.launch(launchOptions);
+    page = await browser.newPage();
+
     await page.setDefaultNavigationTimeout(0);
     page.on('console', ((msg) => {
-        if (msg.text().indexOf('debug') !== -1) {
+        if (msg.text().indexOf('debug') !== -1)
             console.log(msg.text())
-        }
     }));
+}
 
-    await page.setViewport({width: 1440, height: 768});
-    await page.goto(initialPageUrl, {waitUntil: 'networkidle2'});
-
-    // english button
-    const [languageChooser] = await page.$x('//*[@id="ctvk_null_null"]');
-    await languageChooser.click()
-    await page.deleteCookie();
-
+async function scrap(appNumberToSearch) {
     try {
+        // go to page (url address)
+        await page.setViewport({width: 1440, height: 768});
+        await page.goto(bulgariaPatentsPageURL, {waitUntil: 'networkidle2'});
+
+        // english button
+        const [languageChooser] = await page.$x('//*[@id="ctvk_null_null"]');
+        await languageChooser.click()
+        await page.deleteCookie();
+
         // advanced search button
         await page.waitForNetworkIdle();
         const [linkHtml] = await page.$x('//*[@id="_bposervicesportlet_WAR_bposervicesportlet_:main_form:togle_link"]')
@@ -104,12 +118,14 @@ async function getPatentData(appNumber) {
         // todo add scrappedData.url (patent page url) - ovo moze biti da je nemoguce jer nema url,
         //  vec po sesiji server zna sta nama treba
 
-        console.log('#######', scrappedData);
-        await browser.close();
+        console.log('Patent data: ', scrappedData);
     } catch (err) {
         console.log(err);
     }
-    return scrappedData;
+}
+
+async function closeBrowser() {
+    await browser.close();
 }
 
 module.exports = {
