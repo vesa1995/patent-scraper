@@ -21,73 +21,41 @@ async function getPatentData(appNumber) {
     const [languageChooser] = await page.$x('//*[@id="ctvk_null_null"]');
     await languageChooser.click()
     await page.deleteCookie();
-    // await page.waitForTimeout(3000)
 
     try {
         // advanced search button
-        // await page.waitForSelector('#_bposervicesportlet_WAR_bposervicesportlet_\\:main_form\\:togle_link',
-        //     {visible: true});
-        // await page.waitForXPath('//*[@id="_bposervicesportlet_WAR_bposervicesportlet_:main_form:togle_link"]',
-        //     {visible: true});
         await page.waitForNetworkIdle();
         const [linkHtml] = await page.$x('//*[@id="_bposervicesportlet_WAR_bposervicesportlet_:main_form:togle_link"]')
-        if (linkHtml) {
-            await linkHtml.click(); // {delay: 500}
-        }
-        // await page.evaluate(() => {
-        //     const xpath = '//*[@id="_bposervicesportlet_WAR_bposervicesportlet_:main_form:togle_link"]';
-        //     const result = document.evaluate(xpath, document, null, XPathResult.ANY_TYPE, null);
-        //     const r = result.iterateNext();
-        //     r.click();
-        // });
+        if (linkHtml)
+            await linkHtml.click();
 
         // application number checkbox
         await page.waitForNetworkIdle();
-        // await page.waitForSelector('#_bposervicesportlet_WAR_bposervicesportlet_\\:main_form\\:j_idt24');
         const [checkbox] = await page.$x('//*[@id="_bposervicesportlet_WAR_bposervicesportlet_:main_form:j_idt24"]')
-        if (checkbox) {
+        if (checkbox)
             await checkbox.click();
-        }
 
         // application number form
         await page.waitForNetworkIdle();
-        // await page.waitForSelector('#_bposervicesportlet_WAR_bposervicesportlet_\\:main_form\\:app-num-panel');
-        // await page.waitForTimeout(800).then(async () => {
-        //     // input field
-        //     const [textBox1] = await page.$x('//*[@id="_bposervicesportlet_WAR_bposervicesportlet_:main_form:app-num-start_input"]');
-        //     await textBox1.focus();
-        //     await page.keyboard.type(appNumberToSearch);
-        //     // search button
-        //     const [button] = await page.$x('//*[@id="_bposervicesportlet_WAR_bposervicesportlet_:main_form:submit_button"]')
-        //     await button.click({delay: 500})
-        //     // search result table
-        //     await page.waitForSelector('#_bposervicesportlet_WAR_bposervicesportlet_\\:main_form\\:table_result');
-        //     // eye button
-        //     const [eyeLink] = await page.$x('//*[@id="_bposervicesportlet_WAR_bposervicesportlet_:main_form:table_result:0:j_idt365"]')
-        //     await eyeLink.click({delay: 500})
-        // });
         // input field
         const [textBox1] = await page.$x('//*[@id="_bposervicesportlet_WAR_bposervicesportlet_:main_form:app-num-start_input"]');
         await textBox1.focus();
         await page.keyboard.type(appNumberToSearch);
         // search button
         const [button] = await page.$x('//*[@id="_bposervicesportlet_WAR_bposervicesportlet_:main_form:submit_button"]')
-        await button.click() // {delay: 500}
+        await button.click()
         // search result table
         await page.waitForNetworkIdle();
-        // await page.waitForSelector('#_bposervicesportlet_WAR_bposervicesportlet_\\:main_form\\:table_result');
         // eye button
         const [eyeLink] = await page.$x('//*[@id="_bposervicesportlet_WAR_bposervicesportlet_:main_form:table_result:0:j_idt365"]')
-        await eyeLink.click() // {delay: 500}
+        await eyeLink.click()
 
         // table page
         await page.waitForNetworkIdle();
-        // await page.waitForNavigation();
-        // await page.waitForTimeout(2000)
 
         // open all button
         const [expanderLink] = await page.$x('//*[@id="_bposervicesportlet_WAR_bposervicesportlet_:j_idt13:j_idt23:open_all_toggel_panel"]');
-        await expanderLink.click() // {delay: 1000}
+        await expanderLink.click()
         // details data
         await page.$eval('#_bposervicesportlet_WAR_bposervicesportlet_\\:j_idt13\\:j_idt62\\:j_idt63', el => {
             return el.outerHTML
