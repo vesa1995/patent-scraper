@@ -2,10 +2,8 @@ const puppeteer = require("puppeteer");
 
 const bulgariaPatentsPageURL = 'https://portal.bpo.bg/web/guest/bpo_online/-/bpo/epo_patent-search'
 const scrappedData = {};
-
 let browser;
 let page;
-
 
 async function getPatentData(appNumber) {
     await startBrowser();
@@ -21,8 +19,9 @@ async function startBrowser() {
 
     await page.setDefaultNavigationTimeout(0);
     page.on('console', ((msg) => {
-        if (msg.text().indexOf('debug') !== -1)
+        if (msg.text().indexOf('debug') !== -1) {
             console.log(msg.text())
+        }
     }));
 }
 
@@ -40,14 +39,16 @@ async function scrap(appNumberToSearch) {
         // advanced search button
         await page.waitForNetworkIdle();
         const [linkHtml] = await page.$x('//*[@id="_bposervicesportlet_WAR_bposervicesportlet_:main_form:togle_link"]')
-        if (linkHtml)
+        if (linkHtml) {
             await linkHtml.click();
+        }
 
         // application number checkbox
         await page.waitForNetworkIdle();
         const [checkbox] = await page.$x('//*[@id="_bposervicesportlet_WAR_bposervicesportlet_:main_form:j_idt24"]')
-        if (checkbox)
+        if (checkbox) {
             await checkbox.click();
+        }
 
         // application number form
         await page.waitForNetworkIdle();

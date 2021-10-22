@@ -3,7 +3,7 @@
 /**
  * Module dependencies.
  */
-const debug = require("debug")("weather:server");
+const debug = require("debug")("patent:server");
 const http = require("http");
 const {url, port: portNum} = require('./config/constants.js');
 
