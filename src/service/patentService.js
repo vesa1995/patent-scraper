@@ -83,8 +83,8 @@ async function scrap(appNumberToSearch) {
         const registrationDate = await page.$eval('#_bposervicesportlet_WAR_bposervicesportlet_\\:j_idt13\\:j_idt62\\:j_idt63 > div:nth-child(2) > div:nth-child(4)', el => {
             return el.textContent.trim();
         })
-        // Details > Patent number
-        const patentNumber = await page.$eval('#_bposervicesportlet_WAR_bposervicesportlet_\\:j_idt13\\:j_idt62\\:j_idt63 > div:nth-child(2) > div:nth-child(2)', el => {
+        // Details > Patent/Registration number
+        const registrationNumber = await page.$eval('#_bposervicesportlet_WAR_bposervicesportlet_\\:j_idt13\\:j_idt62\\:j_idt63 > div:nth-child(2) > div:nth-child(2)', el => {
             return el.textContent.trim();
         })
         // Details > Application date
@@ -110,7 +110,7 @@ async function scrap(appNumberToSearch) {
 
         // set data
         scrappedData.applicationNumber = applicationNumber;
-        scrappedData.patentNumber = patentNumber;
+        scrappedData.registrationNumber = registrationNumber;
         scrappedData.registrationDate = registrationDate;
         scrappedData.aplicationDate = applicationDate;
         scrappedData.lastPaid = lastPaid;
