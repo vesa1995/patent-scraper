@@ -64,7 +64,7 @@ async function scrape(appNumberToSearch) {
     }
 
     // document > status
-    scrappedData.status = await parseSpanRows('#keres > table:nth-child(18) > tbody:nth-child(1) > ' +
+    scrappedData.status = await parseStatus('#keres > table:nth-child(18) > tbody:nth-child(1) > ' +
         'tr:nth-child(1) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > ' +
         'tr:nth-child(1) > td:nth-child(2)');
 
@@ -74,7 +74,7 @@ async function scrape(appNumberToSearch) {
         'tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > span:nth-child(1)');
 
     // document > applicant
-    scrappedData.applicationOwner = await parseSpanRows('#keres > table:nth-child(24) > ' +
+    scrappedData.applicationOwner = await parseStatus('#keres > table:nth-child(24) > ' +
         'tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > table:nth-child(1) > ' +
         'tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2)');
 
@@ -125,18 +125,57 @@ async function scrape(appNumberToSearch) {
         if (topPix > saveTopPix) {
             break;
         }
-        eleeement = await tableElems[i].evaluate((node) => node.textContent );
+        eleeement = tableElems[i];
         tableTop = topPix;
         console.log("TABLE: " + topPix);
     }
     console.log('konacno resenje: '  + eleeement);
+    await parseFees(eleeement);
 
     // e-register > Maintenance fees > zadnji red ima oba podatka valjda
     // scrappedData.lastPaid = lastPaid; // deposit kolona
     // scrappedData.latestAnnualFeePaid = latestAnnualFeePaid; // todo ne znam koja kolona, vrv mora da se racuna
 }
 
-async function parseSpanRows(selector) {
+async function parseFees(element) {
+    let elementsArray = await page.evaluateHandle((node) => node.children, element);
+    console.log(elementsArray.length, 'leeeeeeeeeeeeeeen');
+    console.log(getContent(elementsArray));
+    for (let i = 1; i <= elementsArray.length; i++) {
+        let topPix = await elementsArray[i].evaluate((node) => node.textContent );
+        console.log(topPix);
+    }
+    const names = [];
+    names.push(await (await element.getProperty('tagName')).jsonValue());
+    console.log('ovo radi???? ' , names);
+    // for (let i = 1; i <= names.length; i++) {
+    //     let gfg = await names[i].evaluate((node) => node.textContent );
+    //     console.log(gfg);
+    // }
+
+    let childrenCount;
+    try {
+        childrenCount = await page.$eval(elementsArray,
+            el => {
+                return el.children.length;
+            }
+        );
+    } catch (err) {
+        console.log(err);
+        return "";
+    }
+    let strArray = [];
+    for (let i = 1; i < childrenCount; i++) {
+        let child = await getContent(elementsArray + ' > td:nth-child(' + i + ')');
+        if (child !== "") {
+            strArray.push(child);
+        }
+    }
+    console.log(strArray);
+    return strArray;
+}
+
+async function parseStatus(selector) {
     let childrenCount;
     try {
         childrenCount = await page.$eval(selector,
