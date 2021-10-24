@@ -1,5 +1,7 @@
-const puppeteer = require("puppeteer");
+// const puppeteer = require("puppeteer");
 const browserService = require("./browserService");
+// const {ElementHandle} = require("puppeteer");
+// const {save} = require("debug");
 
 const bulgariaPatentsPageURL = 'http://epub.hpo.hu/e-kutatas/?lang=EN#'
 const scrappedData = {};
@@ -21,7 +23,12 @@ async function scrape(appNumberToSearch) {
     const [first, second] = names;
     console.log(first, second); // 'Luke Eva'
 
-    const [appNumberInput] = x('//*[@id="ipId"]');
+    scrappedData.applicationNumber = appNumberToSearch;
+    scrappedData.registrationNumber = "";
+    scrappedData.aplicationDate = "";
+    scrappedData.status = "";
+    scrappedData.registrationDate = "";
+    scrappedData.applicationOwner = "";
 
     try {
         // input field
@@ -34,27 +41,16 @@ async function scrape(appNumberToSearch) {
         await page.waitForNetworkIdle({waitUntil: 'networkidle2'});
     } catch (err) {
         console.log(err);
-        return scrappedData; // {}
+        return scrappedData;
     }
 
-    try {
-        // table > registration number
-        const registrationNumber = await page.$eval('.ev_dhx_skyblue > td:nth-child(4)',
-            el => {
-                return el.textContent.trim();
-            }
-        );
-        // table > application date
-        const applicationDate = await page.$eval('.ev_dhx_skyblue > td:nth-child(9)',
-            el => {
-                return el.textContent.trim();
-            }
-        );
-        scrappedData.registrationNumber = registrationNumber;
-        scrappedData.aplicationDate = applicationDate;
-    } catch (err) {
-        console.log(err);
-    }
+    let selector = '.ev_dhx_skyblue > td:nth-child(4)';
+    // table > registration number
+    scrappedData.registrationNumber = await getContent(selector);
+
+    selector = '.ev_dhx_skyblue > td:nth-child(9)';
+    // table > application date
+    scrappedData.aplicationDate = await getContent(selector);
 
     try {
         // app number > click
@@ -67,77 +63,113 @@ async function scrape(appNumberToSearch) {
         return scrappedData;
     }
 
-    try {
-        // document > status
-        const status = parseRows('#keres > table:nth-child(18) > tbody:nth-child(1) > ' +
-            'tr:nth-child(1) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > ' +
-            'tr:nth-child(1) > td:nth-child(2)');
-        // document > publication date
-        const registrationDate = await page.$eval('#keres > table:nth-child(32) > ' +
-            'tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > table:nth-child(2) > ' +
-            'tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > span:nth-child(1)',
-            el => {
-                return el.textContent.trim();
-            }
-        );
-        scrappedData.status = status;
-        scrappedData.registrationDate = registrationDate;
-    } catch (err) {
-        console.log(err);
-    }
+    // document > status
+    scrappedData.status = await parseSpanRows('#keres > table:nth-child(18) > tbody:nth-child(1) > ' +
+        'tr:nth-child(1) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > ' +
+        'tr:nth-child(1) > td:nth-child(2)');
+
+    // document > publication date
+    scrappedData.registrationDate = await getContent('#keres > table:nth-child(32) > ' +
+        'tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > table:nth-child(2) > ' +
+        'tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > span:nth-child(1)');
 
     // document > applicant
-    let applicationOwner = "";
+    scrappedData.applicationOwner = await parseSpanRows('#keres > table:nth-child(24) > ' +
+        'tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > table:nth-child(1) > ' +
+        'tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2)');
+
     try {
-        applicationOwner = parseRows('#keres > table:nth-child(24) > ' +
-            'tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > table:nth-child(1) > ' +
-            'tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2)');
+        // e-register > click
+        const [eRegisterLabel] = await page.$x('/html/body/table[3]/tbody/tr/td[2]/table/' +
+            'tbody/tr/td/div[3]/table[1]/tbody/tr/td[1]/input');
+        await eRegisterLabel.click();
+        await page.waitForNetworkIdle({waitUntil: 'networkidle2'});
     } catch (err) {
+        console.log(err);
+        return scrappedData;
     }
-    // e-register > click
-    const [eRegisterLabel] = await page.$x('/html/body/table[3]/tbody/tr/td[2]/table/' +
-        'tbody/tr/td/div[3]/table[1]/tbody/tr/td[1]/input');
-    await eRegisterLabel.click();
-    await page.waitForNetworkIdle({waitUntil: 'networkidle2'});
 
-    // set data
-    scrappedData.applicationNumber = appNumberToSearch;
+    const spans = await page.$$('.dhtmlx_wins_body_inner span'); // Array<ElementHandle>
+    console.log('spans[0].toString()', spans[0].toString());
+    const str = await spans[0].evaluate((node) => node.innerText);
+    console.log("str: ", str);
+    const str2 = await spans[2].evaluate((node) => node.textContent);
+    console.log("str2: ", str2);
+    let saveSpan;
+    for (let i = 1; i < spans.length; i++) {
+        let txt = await spans[i].evaluate((node) => node.textContent );
+        let topPix = await spans[i].evaluate((node) => node.offsetTop );
+        if (txt === 'Fenntartási díjak') {
+            saveSpan = topPix;
+        }
+        // console.log(txt + '       .');
+    }
 
-    scrappedData.aplicationOwner = applicationOwner;
+    console.log('top offset from window ' + saveSpan);
+    const hrs = await page.$$('.dhtmlx_wins_body_inner hr'); // Array<ElementHandle>
+    let saveTopPix;
+    for (let i = 1; i < hrs.length; i++) {
+        let topPix = await hrs[i].evaluate((node) => node.offsetTop );
+        console.log(topPix);
+        if (topPix > saveSpan) {
+            saveTopPix = topPix;
+            break;
+        }
+    }
+
+    const tableElems = await page.$$('.dhtmlx_wins_body_inner table'); // Array<ElementHandle>
+    let tableTop;
+    let eleeement;
+    for (let i = 1; i < tableElems.length; i++) {
+        let topPix = await tableElems[i].evaluate((node) => node.offsetTop );
+        if (topPix > saveTopPix) {
+            break;
+        }
+        eleeement = await tableElems[i].evaluate((node) => node.textContent );
+        tableTop = topPix;
+        console.log("TABLE: " + topPix);
+    }
+    console.log('konacno resenje: '  + eleeement);
 
     // e-register > Maintenance fees > zadnji red ima oba podatka valjda
     // scrappedData.lastPaid = lastPaid; // deposit kolona
     // scrappedData.latestAnnualFeePaid = latestAnnualFeePaid; // todo ne znam koja kolona, vrv mora da se racuna
-    // } catch (err) {
-    //     console.log(err);
-    // }
 }
 
-async function x(xpath) {
-    // input field
-    const [appNumberInput] = await page.$x('//*[@id="ipId"]');
-
-}
-
-async function eval(selector) {
-
-}
-
-async function parseRows(selector) {
-    const childrenCount = await page.$eval(selector, el => {
-            return el.children.length;
-        }
-    );
+async function parseSpanRows(selector) {
+    let childrenCount;
+    try {
+        childrenCount = await page.$eval(selector,
+            el => {
+                return el.children.length;
+            }
+        );
+    } catch (err) {
+        console.log(err);
+        return "";
+    }
     let strArray = [];
     for (let i = 1; i < childrenCount; i = i + 2) {
-        let child = await page.$eval(selector + ' > span:nth-child(' + i + ')', el => {
-            return el.textContent.trim();
-        });
-        strArray.push(child); // todo dont add if child === undefined
+        let child = await getContent(selector + ' > span:nth-child(' + i + ')');
+        if (child !== "") {
+            strArray.push(child);
+        }
     }
     return strArray;
 }
 
+async function getContent(selector) {
+    try {
+        return await page.$eval(selector,
+            el => {
+                return el.textContent.trim();
+            }
+        );
+    } catch (err) {
+        console.log(err);
+        return "";
+    }
+}
 
 module.exports = {
     getPatentData,
