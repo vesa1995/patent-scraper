@@ -1,11 +1,9 @@
-// const puppeteer = require("puppeteer");
 const browserService = require("./browserService");
-// const {ElementHandle} = require("puppeteer");
-// const {save} = require("debug");
 
 const bulgariaPatentsPageURL = 'http://epub.hpo.hu/e-kutatas/?lang=EN#'
 const scrappedData = {};
 let page;
+
 
 async function getPatentData(appNumber) {
     page = await browserService.startBrowser();
@@ -23,8 +21,8 @@ async function scrape(appNumberToSearch) {
     scrappedData.registrationNumber = "";
     scrappedData.aplicationDate = "";
     scrappedData.status = [];
-    scrappedData.registrationDate = "";
-    scrappedData.applicationOwner = "";
+    // scrappedData.registrationDate = "";
+    // scrappedData.applicationOwner = "";
     scrappedData.maintenanceFees = {};
 
     try {
@@ -59,19 +57,13 @@ async function scrape(appNumberToSearch) {
     }
 
     // document > status
-    scrappedData.status = await parseStatus('#keres > table:nth-child(18) > tbody:nth-child(1) > ' +
-        'tr:nth-child(1) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > ' +
-        'tr:nth-child(1) > td:nth-child(2)');
+    scrappedData.status = await scrapeBetweenTagAndHr('#keres', 'span', 'Status data');
 
     // document > publication date
-    scrappedData.registrationDate = await getContent('#keres > table:nth-child(32) > ' +
-        'tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > table:nth-child(2) > ' +
-        'tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > span:nth-child(1)');
+    // scrappedData.registrationDate = await getContent('');
 
     // document > applicant
-    scrappedData.applicationOwner = await parseStatus('#keres > table:nth-child(24) > ' +
-        'tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > table:nth-child(1) > ' +
-        'tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2)');
+    // scrappedData.applicationOwner = await scrapeSpanChildren('');
 
     try {
         // e-register > click
@@ -84,83 +76,52 @@ async function scrape(appNumberToSearch) {
         return scrappedData;
     }
 
-    // maintenance fees parsing... from here to end
-    const spanElements = await page.$$('.dhtmlx_wins_body_inner span'); // Array<ElementHandle>
-    // console.log('spans[0].toString()', spans[0].toString());
-    // const str = await spans[0].evaluate((node) => node.innerText);
-    // console.log("str: ", str);
-    // const str2 = await spans[2].evaluate((node) => node.textContent);
-    // console.log("str2: ", str2);
-    let maintenanceFeesLabelPositionY;
+    scrappedData.maintenanceFees = await scrapeMaintenanceFees();
+}
+
+async function scrapeBetweenTagAndHr(selectorBase, tagToScrape, labelText) {
+    const spanElements = await page.$$(selectorBase + ' span'); // Array<ElementHandle>
+    let spanPositionY;
     for (let i = 1; i < spanElements.length; i++) {
         let text = await spanElements[i].evaluate((node) => node.textContent);
         let yPosition = await spanElements[i].evaluate(
             (node) => node.getBoundingClientRect().top + document.documentElement.scrollTop
         );
-        if (text === 'Fenntartási díjak') {
-            maintenanceFeesLabelPositionY = yPosition;
+        if (text === labelText) {
+            spanPositionY = yPosition;
             break;
         }
     }
-    // console.log('top offset from window ' + maintenanceFeesLabelPositionY);
 
-    const hrElements = await page.$$('.dhtmlx_wins_body_inner hr');
+    const hrElements = await page.$$(selectorBase + ' hr');
     let hrPositionY;
     for (let i = 1; i < hrElements.length; i++) {
         let yPosition = await hrElements[i].evaluate(
             (node) => node.getBoundingClientRect().top + document.documentElement.scrollTop
         );
-        // console.log(topPix);
-        if (yPosition > maintenanceFeesLabelPositionY) {
+        if (yPosition > spanPositionY) {
             hrPositionY = yPosition;
             break;
         }
     }
 
-    const rowElements = await page.$$('.dhtmlx_wins_body_inner table');
-    let lastRowPositionY;
-    // let lastRowElement;
-    for (let i = 1; i < rowElements.length; i++) {
-        let yPosition = await rowElements[i].evaluate(
+    const elements = await page.$$(selectorBase + ' ' + tagToScrape);
+    let data = [];
+    for (let i = 1; i < elements.length; i++) {
+        let yPosition = await elements[i].evaluate(
             (node) => node.getBoundingClientRect().top + document.documentElement.scrollTop
         );
-        if (yPosition > hrPositionY) {
-            break;
-        }
-        lastRowPositionY = yPosition;
-        // lastRowElement = rowElements[i];
-        // console.log("TABLE: " + yPosition);
-    }
-    // console.log('ceo red: '  + lastRowElement);
-
-    // const spanElements = await page.$$('.dhtmlx_wins_body_inner span');
-    // let rowSpanPositionY;
-    let lastRowObject = {};
-    let columnNameArray = ['Payer', 'Deposit', 'Amount', 'Validity', 'Remnant'];
-    let idx = 0;
-    for (let i = 1; i < spanElements.length; i++) {
-        let yPosition = await spanElements[i].evaluate(
-            (node) => node.getBoundingClientRect().top + document.documentElement.scrollTop
-        );
-        if (yPosition >= lastRowPositionY && yPosition <= hrPositionY) {
-            let text = await spanElements[i].evaluate((node) => node.textContent.trim());
+        if (yPosition > spanPositionY && yPosition < hrPositionY) {
+            let text = await elements[i].evaluate((node) => node.textContent.trim());
             if (text !== '') {
-                lastRowObject[columnNameArray[idx]] = text;
-                idx++;
+                data.push(text);
             }
         }
-        // console.log(yPosition, lastRowPositionY, hrPositionY, await spanElements[i].evaluate((node) => node.textContent));
-        // rowSpanPositionY = yPosition;
     }
-    // console.log('res = ' + columnNameArray);
-    scrappedData.maintenanceFees = lastRowObject;
-
-    // e-register > Maintenance fees > zadnji red ima oba podatka valjda
-    // scrappedData.lastPaid = lastPaid; // deposit kolona
-    // scrappedData.latestAnnualFeePaid = latestAnnualFeePaid; // todo ne znam koja kolona, vrv mora da se racuna
+    return data;
 }
 
-async function parseStatus(selector) {
+async function scrapeSpanChildren(selector) {
     let childrenCount;
     try {
         childrenCount = await page.$eval(selector,
@@ -180,6 +141,62 @@ async function parseStatus(selector) {
         }
     }
     return strArray;
+}
+
+async function scrapeMaintenanceFees() {
+    const spanElements = await page.$$('.dhtmlx_wins_body_inner span'); // Array<ElementHandle>
+    let maintenanceFeesLabelPositionY;
+    for (let i = 1; i < spanElements.length; i++) {
+        let text = await spanElements[i].evaluate((node) => node.textContent);
+        let yPosition = await spanElements[i].evaluate(
+            (node) => node.getBoundingClientRect().top + document.documentElement.scrollTop
+        );
+        if (text === 'Fenntartási díjak') {
+            maintenanceFeesLabelPositionY = yPosition;
+            break;
+        }
+    }
+
+    const hrElements = await page.$$('.dhtmlx_wins_body_inner hr');
+    let hrPositionY;
+    for (let i = 1; i < hrElements.length; i++) {
+        let yPosition = await hrElements[i].evaluate(
+            (node) => node.getBoundingClientRect().top + document.documentElement.scrollTop
+        );
+        if (yPosition > maintenanceFeesLabelPositionY) {
+            hrPositionY = yPosition;
+            break;
+        }
+    }
+
+    const rowElements = await page.$$('.dhtmlx_wins_body_inner table');
+    let lastRowPositionY;
+    for (let i = 1; i < rowElements.length; i++) {
+        let yPosition = await rowElements[i].evaluate(
+            (node) => node.getBoundingClientRect().top + document.documentElement.scrollTop
+        );
+        if (yPosition > hrPositionY) {
+            break;
+        }
+        lastRowPositionY = yPosition;
+    }
+
+    let lastRowObject = {};
+    let columnNameArray = ['Payer', 'Deposit', 'Amount', 'Validity', 'Remnant'];
+    let idx = 0;
+    for (let i = 1; i < spanElements.length; i++) {
+        let yPosition = await spanElements[i].evaluate(
+            (node) => node.getBoundingClientRect().top + document.documentElement.scrollTop
+        );
+        if (yPosition > lastRowPositionY && yPosition < hrPositionY) {
+            let text = await spanElements[i].evaluate((node) => node.textContent.trim());
+            if (text !== '') {
+                lastRowObject[columnNameArray[idx]] = text;
+                idx++;
+            }
+        }
+    }
+    return lastRowObject;
 }
 
 async function getContent(selector) {
