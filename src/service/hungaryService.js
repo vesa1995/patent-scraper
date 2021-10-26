@@ -7,10 +7,9 @@ let page;
 
 
 function getPatentData(appNumber) {
-    // asyncDownloadData(appNumber).then(data =>
-    //     requestService.sendData(data)
-    // );
-    requestService.sendData('data');
+    asyncDownloadData(appNumber).then(data =>
+        requestService.sendData(data)
+    );
     return "Downloading data...";
 }
 
