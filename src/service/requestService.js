@@ -1,4 +1,5 @@
 const https = require('https')
+const {backendUrl, backendPort, backendEndpoint} = require('./../config/constants');
 
 
 async function sendData(scrapedData) {
@@ -9,9 +10,9 @@ async function sendData(scrapedData) {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
     const options = {
-        hostname: 'localhost',
-        port: 5001,
-        path: '/api/Text/hungary',
+        hostname: backendUrl,
+        port: backendPort,
+        path: backendEndpoint,
         method: 'POST',
         connection: 'keep-alive',
         accept: '*/*',
