@@ -1,11 +1,20 @@
 const browserService = require("./browserService");
+const requestService = require("./requestService");
 
 const bulgariaPatentsPageURL = 'http://epub.hpo.hu/e-kutatas/?lang=EN#'
 const scrappedData = {};
 let page;
 
 
-async function getPatentData(appNumber) {
+function getPatentData(appNumber) {
+    // asyncDownloadData(appNumber).then(data =>
+    //     requestService.sendData(data)
+    // );
+    requestService.sendData('data');
+    return "Downloading data...";
+}
+
+async function asyncDownloadData(appNumber) {
     page = await browserService.startBrowser();
     await scrape(appNumber);
     await browserService.closeBrowser();
@@ -21,8 +30,6 @@ async function scrape(appNumberToSearch) {
     scrappedData.registrationNumber = "";
     scrappedData.aplicationDate = "";
     scrappedData.status = [];
-    // scrappedData.registrationDate = "";
-    // scrappedData.applicationOwner = "";
     scrappedData.maintenanceFees = {};
 
     try {
@@ -119,28 +126,6 @@ async function scrapeBetweenTagAndHr(selectorBase, tagToScrape, labelText) {
         }
     }
     return data;
-}
-
-async function scrapeSpanChildren(selector) {
-    let childrenCount;
-    try {
-        childrenCount = await page.$eval(selector,
-            el => {
-                return el.children.length;
-            }
-        );
-    } catch (err) {
-        console.log(err);
-        return "";
-    }
-    let strArray = [];
-    for (let i = 1; i < childrenCount; i = i + 2) {
-        let child = await getContent(selector + ' > span:nth-child(' + i + ')');
-        if (child !== "") {
-            strArray.push(child);
-        }
-    }
-    return strArray;
 }
 
 async function scrapeMaintenanceFees() {

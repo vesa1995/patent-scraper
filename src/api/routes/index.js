@@ -17,7 +17,7 @@ router.get(
 );
 
 router.get(
-    "/patent/:appNumber", // EP10797960
+    "/patent/:appNumber", // example: /patent/EP10797960
     asyncHandler(async (req, res, next) => {
         const patentData = await patentService.getPatentData(req.params["appNumber"]);
         res.send(patentData);
@@ -25,7 +25,7 @@ router.get(
 );
 
 router.get(
-    "/hungary/patent/:appNumber", // E11700404
+    "/hungary/patent/:appNumber", // example: /hungary/patent/E11700404
     asyncHandler(async (req, res, next) => {
         const patentData = await hungaryService.getPatentData(req.params["appNumber"]);
         res.send(patentData);
