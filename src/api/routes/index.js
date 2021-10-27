@@ -4,7 +4,6 @@ const express = require("express");
 const windService = require("../../service/windService");
 const patentService = require("../../service/bulgariaService");
 const hungaryService = require("../../service/hungaryService");
-const authorService = require("../../service/authorService");
 
 const router = new express.Router();
 
@@ -39,14 +38,6 @@ router.get(
         let cache = req.query.cache; // todo change param name maybe?
         const patentData = await hungaryService.getPatentCacheData(appNumber, cache);
         console.log(patentData)
-        res.send(patentData);
-    })
-);
-
-router.post(
-    "/author/:name",
-    asyncHandler(async (req, res, next) => {
-        const patentData = await authorService.createAuthor(req.params["name"]);
         res.send(patentData);
     })
 );
