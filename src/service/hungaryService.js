@@ -1,16 +1,27 @@
 const browserService = require("./browserService");
 const requestService = require("./requestService");
+const cacheService = require("./cacheService");
 
-const bulgariaPatentsPageURL = 'http://epub.hpo.hu/e-kutatas/?lang=EN#'
+const hungaryPatentsPageURL = 'http://epub.hpo.hu/e-kutatas/?lang=EN#'
 const scrappedData = {};
 let page;
 
 
 function getPatentData(appNumber) {
-    asyncDownloadData(appNumber).then(data =>
-        requestService.sendData(data)
+    asyncDownloadData(appNumber).then(data => {
+            cacheService.saveData(data);
+        }
     );
     return "Downloading data...";
+}
+
+async function getPatentCacheData(appNumber, cache) {
+    if (cache === 'yes') {
+        return await asyncDatabaseData(appNumber);
+    } else {
+        asyncDownloadData(appNumber);
+        return "Downloading data...";
+    }
 }
 
 async function asyncDownloadData(appNumber) {
@@ -20,14 +31,18 @@ async function asyncDownloadData(appNumber) {
     return scrappedData;
 }
 
+async function asyncDatabaseData(appNumber) {
+    return await cacheService.getData(appNumber);
+}
+
 async function scrape(appNumberToSearch) {
     // go to page (url address)
     await page.setViewport({width: 1440, height: 768});
-    await page.goto(bulgariaPatentsPageURL, {waitUntil: 'networkidle2'});
+    await page.goto(hungaryPatentsPageURL, {waitUntil: 'networkidle2'});
 
     scrappedData.applicationNumber = appNumberToSearch;
     scrappedData.registrationNumber = "";
-    scrappedData.aplicationDate = "";
+    scrappedData.applicationDate = "";
     scrappedData.status = [];
     scrappedData.maintenanceFees = {};
 
@@ -49,7 +64,7 @@ async function scrape(appNumberToSearch) {
     scrappedData.registrationNumber = await getContent('.ev_dhx_skyblue > td:nth-child(4)');
 
     // table > application date
-    scrappedData.aplicationDate = await getContent('.ev_dhx_skyblue > td:nth-child(9)');
+    scrappedData.applicationDate = await getContent('.ev_dhx_skyblue > td:nth-child(9)');
 
     try {
         // app number > click
@@ -166,7 +181,7 @@ async function scrapeMaintenanceFees() {
     }
 
     let lastRowObject = {};
-    let columnNameArray = ['Payer', 'Deposit', 'Amount', 'Validity', 'Remnant'];
+    let columnNameArray = ['payer', 'deposit', 'amount', 'validity', 'remnant'];
     let idx = 0;
     for (let i = 1; i < spanElements.length; i++) {
         let yPosition = await spanElements[i].evaluate(
@@ -198,4 +213,5 @@ async function getContent(selector) {
 
 module.exports = {
     getPatentData,
+    getPatentCacheData
 };

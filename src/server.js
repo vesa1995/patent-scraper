@@ -24,6 +24,7 @@ const server = http.createServer(app);
 server.listen(port);
 server.on("error", onError);
 server.on("listening", onListening);
+process.on('warning', e => console.warn(e.stack));
 
 /**
  * Normalize a port into a number, string, or false.

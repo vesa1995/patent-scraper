@@ -7,6 +7,8 @@ async function sendData(scrapedData) {
         JSON.stringify(scrapedData)
     );
 
+    console.log(scrapedData);
+
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
     const options = {
