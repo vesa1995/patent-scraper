@@ -24,7 +24,7 @@ router.get(
 );
 
 router.get(
-    "/hungary/patent/:appNumber", // example: /hungary/patent/E11700404
+    "/hungary/:appNumber", // example: /hungary/patent/E11700404
     asyncHandler(async (req, res, next) => {
         const patentData = await hungaryService.getPatentData(req.params["appNumber"]);
         res.send(patentData);
@@ -32,11 +32,9 @@ router.get(
 );
 
 router.get(
-    "/hungary/patent", // example: /hungary/patent/?app_num=E11700404&cache=yes
+    "/hungary/cache/:appNumber", // example: /hungary/cache/E11700404
     asyncHandler(async (req, res, next) => {
-        let appNumber = req.query.app_num;
-        let cache = req.query.cache; // todo change param name maybe?
-        const patentData = await hungaryService.getPatentCacheData(appNumber, cache);
+        const patentData = await hungaryService.getPatentCacheData(req.params["appNumber"]);
         console.log(patentData)
         res.send(patentData);
     })

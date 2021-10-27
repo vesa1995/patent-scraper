@@ -7,32 +7,21 @@ const scrappedData = {};
 let page;
 
 
-function getPatentData(appNumber) {
-    asyncDownloadData(appNumber).then(data => {
-            cacheService.saveData(data);
-        }
-    );
-    return "Downloading data...";
+async function getPatentCacheData(appNumber) {
+    return await cacheService.getData(appNumber);
 }
 
-async function getPatentCacheData(appNumber, cache) {
-    if (cache === 'yes') {
-        return await asyncDatabaseData(appNumber);
-    } else {
-        asyncDownloadData(appNumber);
-        return "Downloading data...";
-    }
+function getPatentData(appNumber) {
+    asyncDownloadData(appNumber);
+    return "Downloading data...";
 }
 
 async function asyncDownloadData(appNumber) {
     page = await browserService.startBrowser();
     await scrape(appNumber);
     await browserService.closeBrowser();
+    await cacheService.saveData(data);
     return scrappedData;
-}
-
-async function asyncDatabaseData(appNumber) {
-    return await cacheService.getData(appNumber);
 }
 
 async function scrape(appNumberToSearch) {
