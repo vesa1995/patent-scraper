@@ -1,5 +1,4 @@
 const browserService = require("./browserService");
-const requestService = require("./requestService");
 const cacheService = require("./cacheService");
 
 const hungaryPatentsPageURL = 'http://epub.hpo.hu/e-kutatas/?lang=EN#'
@@ -11,8 +10,8 @@ async function getPatentCacheData(appNumber) {
     return await cacheService.getData(appNumber);
 }
 
-function getPatentData(appNumber) {
-    asyncDownloadData(appNumber);
+async function getPatentData(appNumber) {
+    await asyncDownloadData(appNumber);
     return "Downloading data...";
 }
 

@@ -1,20 +1,18 @@
 const https = require('https')
-const {backendUrl, backendPort, backendEndpoint} = require('./../config/constants');
+// const {backendUrl, backendPort, backendEndpoint} = require('./../config/constants');
 
 
-async function sendData(scrapedData) {
+async function sendData(clientAddress, clientPort, scrapedData) {
     const dataToSend = new TextEncoder().encode(
         JSON.stringify(scrapedData)
     );
 
-    console.log(scrapedData);
-
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
     const options = {
-        hostname: backendUrl,
-        port: backendPort,
-        path: backendEndpoint,
+        hostname: clientAddress,
+        port: clientPort,
+        // path: backendEndpoint,
         method: 'POST',
         connection: 'keep-alive',
         accept: '*/*',
