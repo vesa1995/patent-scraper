@@ -1,5 +1,5 @@
 const https = require('https')
-const {backendUrl, backendPort, backendEndpoint} = require('./../config/constants');
+const {backendUrl, backendPort, backendEndpoint} = require('../config/constants');
 
 
 async function sendData(scrapedData) {

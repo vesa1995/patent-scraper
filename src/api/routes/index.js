@@ -1,9 +1,9 @@
 const asyncHandler = require("express-async-handler");
 const express = require("express");
 
-const windService = require("../../service/windService");
-const patentService = require("../../service/bulgariaService");
-const hungaryService = require("../../service/hungaryService");
+const windService = require("../../service/windService.ts");
+const patentService = require("../../service/bulgariaService.ts");
+const hungaryService = require("../../service/hungaryService.ts");
 
 const router = new express.Router();
 

@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const {mongoUrl} = require('./constants');
+const {mongoUrl} = require('./constants.js');
 
 module.exports = {
     initializeDB: async () => {

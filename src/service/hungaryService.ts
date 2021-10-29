@@ -1,6 +1,6 @@
-const browserService = require("./browserService");
-const requestService = require("./requestService");
-const cacheService = require("./cacheService");
+const browserService = require("./browserService.ts");
+const requestService = require("./requestService.ts");
+const cacheService = require("./cacheService.ts");
 
 const hungaryPatentsPageURL = 'http://epub.hpo.hu/e-kutatas/?lang=EN#'
 const scrappedData = {};

@@ -1,4 +1,4 @@
-const Patent = require("./../model/patent");
+const Patent = require("../model/patent");
 
 
 async function createPatent(data) {

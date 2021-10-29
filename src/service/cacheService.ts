@@ -1,4 +1,4 @@
-const patentService = require('./patentService');
+const patentService = require('./patentService.ts');
 
 
 async function saveData(data) {

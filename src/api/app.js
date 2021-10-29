@@ -2,8 +2,8 @@ const cookieParser = require("cookie-parser");
 const express = require("express");
 const logger = require("morgan");
 const path = require("path");
-const config = require('../config/config')
-const routes = require("./routes/index");
+const config = require('../config/config.ts')
+const routes = require("./routes");
 
 const app = express();
 
