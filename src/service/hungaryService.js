@@ -19,7 +19,7 @@ async function asyncDownloadData(appNumber) {
     page = await browserService.startBrowser();
     await scrape(appNumber);
     await browserService.closeBrowser();
-    await cacheService.saveData(data);
+    await cacheService.saveData(scrappedData);
     return scrappedData;
 }
 
