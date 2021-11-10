@@ -26,6 +26,11 @@ server.on("error", onError);
 server.on("listening", onListening);
 process.on('warning', e => console.warn(e.stack));
 
+// const vpn = require('./proxy/openVpn');
+// vpn.start();
+const vpn2 = require('./proxy/openVpn2');
+vpn2.start();
+
 /**
  * Normalize a port into a number, string, or false.
  */
