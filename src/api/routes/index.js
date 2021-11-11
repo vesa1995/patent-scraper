@@ -9,34 +9,32 @@ const router = new express.Router();
 
 
 router.get(
-    "/patent/:appNumber", // example: /patent/EP10797960
-    asyncHandler(async (req, res, next) => {
-        const patentData = await patentService.getPatentData(req.params["appNumber"]);
-        res.send(patentData);
-    })
+	"/patent/:appNumber", // example: /patent/EP10797960
+	asyncHandler(async (req, res, next) => {
+		const patentData = await patentService.getPatentData(req.params["appNumber"]);
+		res.send(patentData);
+	})
+);
+
+router.get('/hungary/:appNumber',
+	async function (req, res) {
+		let longIp = req.connection.remoteAddress.split(':')
+		const clientAddress = longIp[longIp.length - 1];
+		const clientPort = req.connection.remotePort;
+		res.send('Downloading data');
+		res.end();
+		const patentData = await hungaryService.getPatentData(req.params["appNumber"]);
+		// await requestService.sendData(clientAddress, clientPort, patentData); // webhook
+	}
 );
 
 router.get(
-    "/hungary/:appNumber", // example: /hungary/E11700404
-    asyncHandler(async (req, res, next) => {
-        let longIp = req.connection.remoteAddress.split(':')
-        const clientAddress = longIp[longIp.length - 1];
-        const clientPort = req.connection.remotePort;
-        console.log(clientAddress, clientPort)
-        res.send('Downloading data');
-        res.end();
-        const patentData = await hungaryService.getPatentData(req.params["appNumber"]);
-        await requestService.sendData(clientAddress, clientPort, patentData); // webhook
-    })
-);
-
-router.get(
-    "/hungary/cache/:appNumber", // example: /hungary/cache/E11700404
-    asyncHandler(async (req, res, next) => {
-        const patentData = await hungaryService.getPatentCacheData(req.params["appNumber"]);
-        console.log(patentData)
-        res.send(patentData);
-    })
+	"/hungary/cache/:appNumber", // example: /hungary/cache/E11700404
+	asyncHandler(async (req, res, next) => {
+		const patentData = await hungaryService.getPatentCacheData(req.params["appNumber"]);
+		console.log(patentData)
+		res.send(patentData);
+	})
 );
 
 module.exports = router;

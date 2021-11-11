@@ -20,7 +20,7 @@ async function createPatent(data) {
             if (error) {
                 console.error(error)
             }
-            console.log('patent saved:\n', document)
+            // console.log('patent saved:\n', document)
         });
     } catch (error) {
         throw error

@@ -9,12 +9,12 @@ VPN2.start = function () {
 
     // var filePath = path.normalize('../geo/ipvanish/ipvanish-AU-Sydney-syd-a16.ovpn');
     var filePath = path.normalize('D:\\CodeProjects\\webstorm\\patent\\src\\proxy\\japan.ovpn'); // D:\CodeProjects\webstorm\patent\src\proxy\japan.ovpn
-    console.log(filePath);
+    // console.log(filePath);
 
     var fs = require('fs');
     fs.readFile(filePath, {encoding: 'utf-8'}, function(err,data){
         if (!err) {
-            console.log('received data: ' + data.substring(0, 500).replace('\n\r', ' '));
+            // console.log('received data: ' + data.substring(0, 500).replace('\n\r', ' '));
         } else {
             console.log('err =', err);
         }

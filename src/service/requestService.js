@@ -1,8 +1,45 @@
 const https = require('https')
+const http = require('http')
 // const {backendUrl, backendPort, backendEndpoint} = require('./../config/constants');
+const chromeDebugUrl = 'http://127.0.0.1:9222/json/version';
 
 
-async function sendData(clientAddress, clientPort, scrapedData) {
+async function fetchData() {
+    return new Promise((resolve, reject) => {
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+
+        const options = {
+            hostname: '127.0.0.1',
+            port: '9222',
+            path: '/json/version',
+            method: 'GET',
+            connection: 'keep-alive',
+            accept: '*/*',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        }
+
+        const req = http.request(options, res => {
+            // console.log('statusCode =', res.statusCode);
+
+            res.on('data', dataStream => {
+                const data = JSON.parse(dataStream);
+                // console.log(data);
+                resolve(data.webSocketDebuggerUrl);
+            });
+        });
+
+        req.on('error', error => {
+            console.error(error);
+            reject(error);
+        });
+
+        req.end();
+    });
+}
+
+async function sendData(clientAddress, clientPort, scrapedData) { // todo use Promise like in fetchData
     const dataToSend = new TextEncoder().encode(
         JSON.stringify(scrapedData)
     );
@@ -26,15 +63,14 @@ async function sendData(clientAddress, clientPort, scrapedData) {
     const req = https.request(options, res => {
         console.log('statusCode =', res.statusCode);
 
-        res.on('data', d => {
-            console.log('data:');
-            process.stdout.write(d);
-            console.log('\n');
+        res.on('data', dataStream => {
+            const data = JSON.parse(dataStream);
+            // console.log(data);
         })
     })
 
     req.on('error', error => {
-        console.error('error:\n', error);
+        console.error(error);
     })
 
     req.write(dataToSend);
@@ -43,4 +79,5 @@ async function sendData(clientAddress, clientPort, scrapedData) {
 
 module.exports = {
     sendData,
+    fetchData,
 };

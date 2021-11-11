@@ -16,9 +16,17 @@ async function getPatentData(appNumber) {
 }
 
 async function asyncDownloadData(appNumber) {
-    page = await browserService.startBrowser();
+    page = await browserService.startPage();
+
+    let pages = await page.browser().pages();
+    let i = 0;
+    for (let page of pages) {
+        console.log('page ' + i + ' url:', page.url());
+        i++;
+    }
+
     await scrape(appNumber);
-    await browserService.closeBrowser();
+    await browserService.closePage();
     await cacheService.saveData(scrappedData);
     return scrappedData;
 }
