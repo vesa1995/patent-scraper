@@ -1,37 +1,8 @@
-const browserService = require("./browserService");
-const cacheService = require("./cacheService");
-
 const hungaryPatentsPageURL = 'http://epub.hpo.hu/e-kutatas/?lang=EN#'
 const scrappedData = {};
-let page;
 
 
-async function getPatentCacheData(appNumber) {
-    return await cacheService.getData(appNumber);
-}
-
-async function getPatentData(appNumber) {
-    await asyncDownloadData(appNumber);
-    return "Downloading data...";
-}
-
-async function asyncDownloadData(appNumber) {
-    page = await browserService.startPage();
-
-    let pages = await page.browser().pages();
-    let i = 0;
-    for (let page of pages) {
-        console.log('page ' + i + ' url:', page.url());
-        i++;
-    }
-
-    await scrape(appNumber);
-    await browserService.closePage();
-    await cacheService.saveData(scrappedData);
-    return scrappedData;
-}
-
-async function scrape(appNumberToSearch) {
+async function scrape(appNumberToSearch, page) {
     // go to page (url address)
     await page.setViewport({width: 1440, height: 768});
     await page.goto(hungaryPatentsPageURL, {waitUntil: 'networkidle2'});
@@ -94,6 +65,7 @@ async function scrape(appNumberToSearch) {
     }
 
     scrappedData.maintenanceFees = await scrapeMaintenanceFees();
+    return scrappedData;
 }
 
 async function scrapeBetweenTagAndHr(selectorBase, tagToScrape, labelText) {
@@ -208,6 +180,5 @@ async function getContent(selector) {
 }
 
 module.exports = {
-    getPatentData,
-    getPatentCacheData
+    scrape
 };

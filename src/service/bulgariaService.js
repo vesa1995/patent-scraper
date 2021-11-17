@@ -1,31 +1,8 @@
-const puppeteer = require("puppeteer");
-
 const bulgariaPatentsPageURL = 'https://portal.bpo.bg/web/guest/bpo_online/-/bpo/epo_patent-search'
 const scrappedData = {};
-let browser;
-let page;
 
-async function getPatentData(appNumber) {
-    await startBrowser();
-    await scrap(appNumber);
-    await closeBrowser();
-    return scrappedData;
-}
 
-async function startBrowser() {
-    const launchOptions = {headless: true, /*args: ['--start-fullscreen'],*/ waitUntil: 'networkidle2'};
-    browser = await puppeteer.launch(launchOptions);
-    page = await browser.newPage();
-
-    await page.setDefaultNavigationTimeout(0);
-    page.on('console', ((msg) => {
-        if (msg.text().indexOf('debug') !== -1) {
-            console.log(msg.text())
-        }
-    }));
-}
-
-async function scrap(appNumberToSearch) {
+async function scrape(appNumberToSearch, page) {
     try {
         // go to page (url address)
         await page.setViewport({width: 1440, height: 768});
@@ -120,15 +97,13 @@ async function scrap(appNumberToSearch) {
 
         // output data
         console.log('Patent data:', scrappedData);
+        return scrappedData;
     } catch (err) {
         console.log(err);
     }
-}
-
-async function closeBrowser() {
-    await browser.close();
+    return {};
 }
 
 module.exports = {
-    getPatentData,
+    scrape
 };

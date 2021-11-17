@@ -1,6 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const express = require("express");
 
+const downloadService = require("../../service/downloadService");
 const patentService = require("../../service/bulgariaService");
 const hungaryService = require("../../service/hungaryService");
 const requestService = require("../../service/requestService");
@@ -11,7 +12,7 @@ const router = new express.Router();
 router.get(
 	"/patent/:appNumber", // example: /patent/EP10797960
 	asyncHandler(async (req, res, next) => {
-		const patentData = await patentService.getPatentData(req.params["appNumber"]);
+		const patentData = await downloadService.getPatentData(req.params["appNumber"], 'bulgaria');
 		res.send(patentData);
 	})
 );
