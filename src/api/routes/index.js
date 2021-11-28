@@ -19,7 +19,7 @@ router.get(
 
 router.get('/hungary/:appNumber',
 	async function (req, res) {
-		let longIp = req.connection.remoteAddress.split(':')
+		let longIp = req.connection.remoteAddress.split(':');
 		const clientAddress = longIp[longIp.length - 1];
 		const clientPort = req.connection.remotePort;
 		res.send('Downloading data');

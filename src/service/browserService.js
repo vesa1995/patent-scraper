@@ -2,7 +2,7 @@ const puppeteer = require("puppeteer");
 const {fetchData} = require('./requestService');
 
 let browser, page;
-// const surfSharkPath = 'C:\\Users\\milos\\AppData\\Local\\Google\\Chrome\\User Data\\Defa' +
+// cons surfSharkPath = 'C:\\Users\\milos\\AppData\\Local\\Google\\Chrome\\User Data\\Defa' +
 //     'ult\\Extensions\\ailoabdmgclmfmhdagmlohpjlbpffblp\\3.9.1_0';
 // const chromePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 
