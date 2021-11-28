@@ -34,14 +34,15 @@ async function startPage() {
             // console.log(msg.text())
         }
     }));
-    return page;
-}
-
-async function closePage() {
     await page.deleteCookie({
         name : 'JSESSIONID',
         domain : 'portal.bpo.bg'
     });
+
+    return page;
+}
+
+async function closePage() {
     await page.close();
 }
 

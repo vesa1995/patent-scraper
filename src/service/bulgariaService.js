@@ -11,7 +11,6 @@ async function scrape(appNumberToSearch, page) {
         // english button
         const [languageChooser] = await page.$x('//*[@id="ctvk_null_null"]');
         await languageChooser.click()
-        await page.deleteCookie();
 
         // advanced search button
         await page.waitForNetworkIdle();
