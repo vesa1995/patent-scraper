@@ -35,6 +35,15 @@ async function scrape(appNumberToSearch, page) {
         // search button
         const [button] = await page.$x('//*[@id="_bposervicesportlet_WAR_bposervicesportlet_:main_form:submit_button"]')
         await button.click()
+        // search result size
+        let searchTableDiv = '#_bposervicesportlet_WAR_bposervicesportlet_\\:main_form\\:j_idt309';
+        let h3 =             '#_bposervicesportlet_WAR_bposervicesportlet_\\:main_form\\:j_idt309 > h3';
+        let nthChild =       '#_bposervicesportlet_WAR_bposervicesportlet_\\:main_form\\:j_idt309 > nth-child(1)'; // nth-child(1)
+        const resultSize = await page.$eval(nthChild,
+            el => {
+                return el.textContent.trim();
+            });
+        console.log('result size:', resultSize);
         // search result table
         await page.waitForNetworkIdle();
         // eye button
